@@ -487,3 +487,28 @@ footer a {
 }
 .web-article p { line-height: 1.6; }
 .web-article a { color: #174b49; text-decoration: underline; }
+
+.entry-form {
+  display: grid;
+  gap: .65rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #d6e5dc;
+  border-radius: 12px;
+  background: #fffefa;
+}
+.entry-form label { font-weight: 700; }
+.entry-form input, .entry-form textarea {
+  width: 100%;
+  padding: .65rem;
+  border: 1px solid #aec2b7;
+  border-radius: 6px;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+}
+.entry-form #entry-cancel { padding-inline: .9rem; }
+#entry-error { color: #a52323; }
+#entry-feedback { padding: .65rem; background: #eff7f1; border-radius: 6px; }
+.article-save { display: block; margin-top: .7rem; }
+.article-save:disabled { opacity: .55; cursor: default; }

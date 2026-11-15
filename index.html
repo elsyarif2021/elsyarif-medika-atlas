@@ -30,7 +30,7 @@
             autocomplete="off"
             aria-describedby="search-note"
           />
-          <p id="search-note">Jika entri belum ada, kata kunci dicari di Wikipedia. Entri yang cocok disimpan di browser ini.</p>
+          <p id="search-note">Jika entri belum ada, kata kunci dicari di Wikipedia. Anda bisa menulis entri sendiri atau menyimpan artikel pilihan.</p>
           <button id="web-search" class="web-search" type="button" aria-controls="web-results" hidden>Cari artikel di aplikasi</button>
         </div>
         <div class="hero-art" aria-hidden="true">
@@ -57,6 +57,7 @@
           <h2 id="results-title">Daftar istilah</h2>
           <span id="count" role="status"></span>
         </div>
+        <p id="entry-feedback" role="status" hidden></p>
         <div id="book" class="book" role="region" aria-label="Buku kamus" tabindex="0" hidden>
           <nav class="book-controls" aria-label="Navigasi halaman">
             <button id="book-prev" type="button" aria-controls="entries" aria-disabled="true">‹ <span>Sebelumnya</span></button>
@@ -69,9 +70,24 @@
           <p></p>
           <div class="empty-actions">
             <button id="web-empty" class="web-search" type="button" aria-controls="web-results" hidden>Cari artikel di aplikasi</button>
+            <button id="add-entry" class="web-search" type="button" hidden>Tambah ke kamus</button>
             <button id="reset" type="button">Reset filter</button>
           </div>
         </div>
+        <form id="entry-form" class="entry-form" aria-labelledby="entry-form-title" hidden>
+          <h2 id="entry-form-title">Tambah istilah ke kamus</h2>
+          <label for="entry-name">Istilah</label>
+          <input id="entry-name" required maxlength="160" />
+          <label for="entry-definition">Arti atau penjelasan</label>
+          <textarea id="entry-definition" required maxlength="2500" rows="4"></textarea>
+          <label for="entry-source">Tautan rujukan (opsional)</label>
+          <input id="entry-source" type="url" maxlength="500" placeholder="https://..." />
+          <p id="entry-error" role="alert" hidden></p>
+          <div class="empty-actions">
+            <button class="web-search" type="submit">Simpan entri</button>
+            <button id="entry-cancel" type="button">Batal</button>
+          </div>
+        </form>
       </section>
       <section id="web-results" class="web-results" aria-labelledby="web-heading" hidden>
         <h2 id="web-heading" tabindex="-1">Hasil artikel</h2>

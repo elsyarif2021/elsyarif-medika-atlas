@@ -408,8 +408,46 @@ try {
 } catch {
   // The dictionary is still usable if browser storage is unavailable.
 }
+const personalCategory = 'Entri pengguna';
+const personalKey = 'medika-atlas-personal-v1';
+const personalEntries = [];
+const titleKey = value => normalize(value.trim()).replace(/\s+/g, ' ');
+const hasTitle = title => terms.some(term => titleKey(term[0]) === titleKey(title));
+
+function rememberPersonalEntry({ title, definition, source }) {
+  if (typeof title !== 'string' || !title.trim() || title.length > 160 ||
+      typeof definition !== 'string' || !definition.trim() || definition.length > 2500 ||
+      typeof source !== 'string' || (source && !safeSource(source)) || hasTitle(title)) return false;
+  personalEntries.push({ title, definition, source });
+  terms.push([title, '', personalCategory, definition, '', '', {
+    fields: [['Jenis informasi', 'Catatan yang ditambahkan pengguna.']],
+    links: source ? [['Rujukan pilihan pengguna', source]] : []
+  }]);
+  return true;
+}
+
+function safeSource(value) {
+  if (value.length > 500) return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && !url.username && !url.password;
+  } catch {
+    return false;
+  }
+}
+
+try {
+  const stored = JSON.parse(localStorage.getItem(personalKey) || '[]');
+  if (Array.isArray(stored)) {
+    for (const entry of stored) {
+      if (entry && typeof entry === 'object') rememberPersonalEntry(entry);
+    }
+  }
+} catch {
+  // A storage failure does not prevent reading the dictionary.
+}
 sortTerms();
-[...new Set([wikiCategory, ...terms.map(term => term[2])])]
+[...new Set([wikiCategory, personalCategory, ...terms.map(term => term[2])])]
   .sort()
   .forEach(label => category.add(new Option(label, label)));
 
@@ -643,35 +681,86 @@ function updateWebSearch(keyword) {
   webStatus.textContent = '';
 }
 
-const wikiWords = value => normalize(value).match(/[\p{L}\p{N}]+/gu) || [];
+const entryForm = byId('entry-form');
+const addEntry = byId('add-entry');
+const entryName = byId('entry-name');
+const entryDefinition = byId('entry-definition');
+const entrySource = byId('entry-source');
+const entryError = byId('entry-error');
+const entryFeedback = byId('entry-feedback');
 
-function importMatchingArticle(pages, keyword) {
-  const words = wikiWords(keyword);
-  const page = pages.find(({ title, extract }) => {
-    if (typeof title !== 'string' || typeof extract !== 'string') return false;
-    const titleWords = wikiWords(title);
-    const healthContext = /\b(penyakit|medis|kedokteran|gangguan|gejala|infeksi|virus|bakteri|obat|kesehatan|rumah sakit|diagnosis|dokter|sindrom|organ tubuh|terapi|medik)\b/i;
-    return words.length && words.every(word => titleWords.includes(word))
-      && healthContext.test(extract);
-  });
-  if (!page || !rememberWikiEntry({
-    id: page.pageid,
-    title: page.title,
-    summary: page.extract.trim().slice(0, 2500),
-    alias: keyword
-  })) return '';
+function closeEntryForm() {
+  entryForm.hidden = true;
+  entryError.hidden = true;
+  entryForm.reset();
+}
 
-  sortTerms();
-  let stored = true;
+function showEntryError(message) {
+  entryError.textContent = message;
+  entryError.hidden = false;
+}
+
+function finishEntry(title, key, records) {
+  let text = title + ' ditambahkan ke kamus di browser ini.';
   try {
-    localStorage.setItem(wikiStorageKey, JSON.stringify([...wikiEntries.values()]));
+    localStorage.setItem(key, JSON.stringify(records));
   } catch {
-    stored = false;
+    text = title + ' ditambahkan untuk sesi ini. Browser tidak dapat menyimpannya.';
   }
-  render({ keepPage: true });
-  return page.title + (stored
-    ? ' ditambahkan ke kamus di browser ini.'
-    : ' ditambahkan untuk sesi ini. Browser tidak dapat menyimpannya.');
+  sortTerms();
+  closeEntryForm();
+  resetFilters();
+  onlyFavorites = false;
+  query.value = title;
+  render();
+  entryFeedback.textContent = text;
+  entryFeedback.hidden = false;
+  book.focus();
+}
+
+addEntry.addEventListener('click', () => {
+  closeEntryForm();
+  entryName.value = query.value.trim();
+  entryForm.hidden = false;
+  entryDefinition.focus();
+});
+
+byId('entry-cancel').addEventListener('click', () => {
+  closeEntryForm();
+  addEntry.focus();
+});
+
+entryForm.addEventListener('submit', event => {
+  event.preventDefault();
+  const title = entryName.value.trim();
+  const definition = entryDefinition.value.trim();
+  const source = entrySource.value.trim();
+  if (!title || !definition) return showEntryError('Isi istilah dan penjelasannya.');
+  if (hasTitle(title)) return showEntryError('Istilah ini sudah ada di kamus.');
+  if (source && !safeSource(source)) return showEntryError('Gunakan tautan rujukan HTTPS yang valid.');
+  if (rememberPersonalEntry({ title, definition, source })) {
+    finishEntry(title, personalKey, personalEntries);
+  }
+});
+
+function makeArticleSave(page, keyword) {
+  const save = document.createElement('button');
+  save.type = 'button';
+  save.className = 'web-search article-save';
+  save.textContent = 'Tambah artikel ke kamus';
+  save.setAttribute('aria-label', 'Tambah ' + page.title + ' ke kamus');
+  save.disabled = !page.extract?.trim() || wikiEntries.has(page.pageid) || hasTitle(page.title);
+  save.addEventListener('click', () => {
+    if (rememberWikiEntry({
+      id: page.pageid, title: page.title,
+      summary: page.extract.trim().slice(0, 2500),
+      alias: keyword.slice(0, 160)
+    })) {
+      save.disabled = true;
+      finishEntry(page.title, wikiStorageKey, [...wikiEntries.values()]);
+    }
+  });
+  return save;
 }
 
 async function searchArticles({ automatic = false } = {}) {
@@ -712,12 +801,9 @@ async function searchArticles({ automatic = false } = {}) {
     if (payload.error) throw new Error('Article search failed');
     if (webRequest !== request || request.signal.aborted) return;
     const pages = (payload.query?.pages || []).sort((a, b) => a.index - b.index);
-    const imported = !bookMatches.length && !onlyFavorites && !letter &&
-      (!category.value || category.value === wikiCategory)
-      ? importMatchingArticle(pages, keyword) : '';
-    webStatus.textContent = imported || (pages.length
+    webStatus.textContent = pages.length
       ? pages.length + ' artikel dari Wikipedia bahasa Indonesia.'
-      : 'Artikel belum ditemukan. Coba kata kunci lain.');
+      : 'Artikel belum ditemukan. Anda masih bisa menulis entri sendiri.';
     for (const page of pages) {
       const article = document.createElement('article');
       article.className = 'web-article';
@@ -728,7 +814,7 @@ async function searchArticles({ automatic = false } = {}) {
       const source = document.createElement('a');
       source.href = 'https://id.wikipedia.org/?curid=' + Number(page.pageid);
       source.textContent = 'Sumber: Wikipedia';
-      article.append(title, summary, source);
+      article.append(title, summary, source, makeArticleSave(page, keyword));
       webItems.append(article);
     }
   } catch {
@@ -772,6 +858,8 @@ function render({ keepPage = false } = {}) {
     );
   }
   empty.hidden = matches.length > 0;
+  addEntry.hidden = onlyFavorites || !keyword || keyword.length > 160 || hasTitle(keyword);
+  if (addEntry.hidden || matches.length) closeEntryForm();
   empty.querySelector('p').textContent =
     onlyFavorites && !favorites.size
       ? 'Belum ada istilah favorit.'
@@ -793,7 +881,11 @@ function resetFilters() {
   letter = '';
 }
 
-query.addEventListener('input', render);
+query.addEventListener('input', () => {
+  closeEntryForm();
+  entryFeedback.hidden = true;
+  render();
+});
 category.addEventListener('change', render);
 favoriteButton.addEventListener('click', () => {
   onlyFavorites = !onlyFavorites;
