@@ -586,19 +586,89 @@ entries.addEventListener('touchend', event => {
   }
 }, { passive: true });
 
-function updateGoogleSearch(keyword) {
-  const href = keyword ? 'https://www.google.com/search?hl=id&q=' + encodeURIComponent(keyword) : '';
-  for (const link of [byId('google-search'), byId('google-empty')]) {
-    link.hidden = !href;
-    if (href) link.href = href;
-    else link.removeAttribute('href');
+const webResults = byId('web-results');
+const webStatus = byId('web-status');
+const webItems = byId('web-items');
+const webButtons = [byId('web-search'), byId('web-empty')];
+let webKeyword = '';
+let webRequest;
+
+function updateWebSearch(keyword) {
+  for (const button of webButtons) button.hidden = !keyword;
+  if (keyword === webKeyword) return;
+  webKeyword = keyword;
+  webRequest?.abort();
+  webResults.hidden = true;
+  webItems.replaceChildren();
+  webStatus.textContent = '';
+}
+
+async function searchArticles() {
+  if (!webKeyword) return;
+  webRequest?.abort();
+  const request = new AbortController();
+  webRequest = request;
+  webResults.hidden = false;
+  webItems.replaceChildren();
+  webStatus.textContent = 'Mencari artikel Wikipedia bahasa Indonesia…';
+  byId('web-heading').focus();
+
+  const url = new URL('https://id.wikipedia.org/w/api.php');
+  url.search = new URLSearchParams({
+    action: 'query',
+    generator: 'search',
+    gsrsearch: webKeyword,
+    gsrlimit: '5',
+    gsrnamespace: '0',
+    prop: 'extracts',
+    exintro: '1',
+    explaintext: '1',
+    exsentences: '2',
+    exlimit: 'max',
+    format: 'json',
+    formatversion: '2',
+    origin: '*'
+  });
+  const timeout = setTimeout(() => request.abort('timeout'), 12000);
+
+  try {
+    const response = await fetch(url, { signal: request.signal, credentials: 'omit' });
+    if (!response.ok) throw new Error('Article search failed');
+    const payload = await response.json();
+    if (payload.error) throw new Error('Article search failed');
+    if (webRequest !== request || request.signal.aborted) return;
+    const pages = (payload.query?.pages || []).sort((a, b) => a.index - b.index);
+    webStatus.textContent = pages.length
+      ? pages.length + ' artikel dari Wikipedia bahasa Indonesia.'
+      : 'Artikel belum ditemukan. Coba kata kunci lain.';
+    for (const page of pages) {
+      const article = document.createElement('article');
+      article.className = 'web-article';
+      const title = document.createElement('h3');
+      title.textContent = page.title;
+      const summary = document.createElement('p');
+      summary.textContent = page.extract?.trim() || 'Ringkasan belum tersedia.';
+      const source = document.createElement('a');
+      source.href = 'https://id.wikipedia.org/?curid=' + Number(page.pageid);
+      source.textContent = 'Sumber: Wikipedia';
+      article.append(title, summary, source);
+      webItems.append(article);
+    }
+  } catch {
+    if (webRequest === request && (!request.signal.aborted || request.signal.reason === 'timeout')) {
+      webStatus.textContent = 'Pencarian artikel sedang gagal. Tekan Cari artikel di aplikasi untuk mencoba lagi.';
+    }
+  } finally {
+    clearTimeout(timeout);
   }
 }
+
+for (const button of webButtons) button.addEventListener('click', searchArticles);
 
 function render({ keepPage = false } = {}) {
   if (!keepPage) pageStart = 0;
   const keyword = query.value.trim();
-  updateGoogleSearch(keyword);
+  updateWebSearch(keyword);
   const words = normalize(keyword).split(/\s+/).filter(Boolean);
   const matches = terms.filter(term => {
     const [name, english, group, , , aliases, details] = term;

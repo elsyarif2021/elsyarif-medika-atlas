@@ -29,7 +29,7 @@
             placeholder="Contoh: hipertensi, parasetamol, RSCM"
             autocomplete="off"
           />
-          <a id="google-search" class="google-search" target="_blank" rel="noopener noreferrer" hidden>Cari di Google <span aria-hidden="true">↗</span></a>
+          <button id="web-search" class="web-search" type="button" aria-controls="web-results" hidden>Cari artikel di aplikasi</button>
         </div>
         <div class="hero-art" aria-hidden="true">
           <span>+</span><span>+</span><span>+</span>
@@ -66,10 +66,15 @@
         <div id="empty" class="empty" hidden>
           <p></p>
           <div class="empty-actions">
-            <a id="google-empty" class="google-search" target="_blank" rel="noopener noreferrer" hidden>Cari di Google <span aria-hidden="true">↗</span></a>
+            <button id="web-empty" class="web-search" type="button" aria-controls="web-results" hidden>Cari artikel di aplikasi</button>
             <button id="reset" type="button">Reset filter</button>
           </div>
         </div>
+      </section>
+      <section id="web-results" class="web-results" aria-labelledby="web-heading" hidden>
+        <h2 id="web-heading" tabindex="-1">Hasil artikel</h2>
+        <p id="web-status" role="status"></p>
+        <div id="web-items"></div>
       </section>
     </main>
     <footer>
