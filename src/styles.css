@@ -444,3 +444,32 @@ footer a {
   font-style: italic;
   line-height: 1.6;
 }
+
+.google-search {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  min-height: 42px;
+  padding: .55rem .9rem;
+  border: 1px solid #17504e;
+  border-radius: 9px;
+  background: #17504e;
+  color: #fff;
+  font-weight: 700;
+  font-size: .9rem;
+  text-decoration: none;
+}
+.google-search:hover { background: #0f3937; }
+.hero .google-search {
+  margin-top: .75rem;
+  border-color: #f6efdf;
+  background: #f6efdf;
+  color: #174b49;
+}
+.hero .google-search:hover { background: #fff; }
+.empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .6rem;
+}

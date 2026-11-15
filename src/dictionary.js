@@ -586,9 +586,20 @@ entries.addEventListener('touchend', event => {
   }
 }, { passive: true });
 
+function updateGoogleSearch(keyword) {
+  const href = keyword ? 'https://www.google.com/search?hl=id&q=' + encodeURIComponent(keyword) : '';
+  for (const link of [byId('google-search'), byId('google-empty')]) {
+    link.hidden = !href;
+    if (href) link.href = href;
+    else link.removeAttribute('href');
+  }
+}
+
 function render({ keepPage = false } = {}) {
   if (!keepPage) pageStart = 0;
-  const words = normalize(query.value.trim()).split(/\s+/).filter(Boolean);
+  const keyword = query.value.trim();
+  updateGoogleSearch(keyword);
+  const words = normalize(keyword).split(/\s+/).filter(Boolean);
   const matches = terms.filter(term => {
     const [name, english, group, , , aliases, details] = term;
     const searchable = normalize([name, english, aliases, ...(
