@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Elsyarif Medika Atlas | Kamus dan direktori medis</title>
+    <meta name="theme-color" content="#123c3d" />
+    <meta name="apple-mobile-web-app-title" content="Medika Atlas" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./icons/icon-180.png" />
+    <link rel="icon" type="image/png" href="./icons/icon-192.png" />
     <link rel="stylesheet" href="./src/styles.css" />
   </head>
   <body>
@@ -12,9 +17,13 @@
         <div class="brand">
           <span class="logo" aria-hidden="true">✚</span> <span>Elsyarif Medika <span class="brand-accent">Atlas</span></span>
         </div>
-        <button id="favorites" type="button" aria-pressed="false">
-          ☆ Favorit <span id="favorite-count">0</span>
-        </button>
+        <div class="nav-actions">
+          <button id="guide-open" type="button">Panduan</button>
+          <button id="install-open" type="button">Instal aplikasi</button>
+          <button id="favorites" type="button" aria-pressed="false">
+            ☆ Favorit <span id="favorite-count">0</span>
+          </button>
+        </div>
       </div>
     </header>
     <main class="shell">
@@ -107,6 +116,47 @@
         >
       </div>
     </footer>
+    <dialog id="app-guide" class="app-guide" aria-labelledby="guide-title">
+      <header class="guide-header">
+        <h2 id="guide-title">Buku panduan</h2>
+        <form method="dialog"><button type="submit" aria-label="Tutup panduan">Tutup</button></form>
+      </header>
+      <nav class="guide-nav" aria-label="Isi panduan">
+        <a href="#guide-about">Pengenalan</a>
+        <a href="#guide-use">Cara pakai</a>
+        <a href="#guide-install">Instalasi</a>
+        <a href="#guide-developer">Pengembang</a>
+      </nav>
+      <section aria-labelledby="guide-about">
+        <h3 id="guide-about" tabindex="-1">Pengenalan aplikasi</h3>
+        <p>Elsyarif Medika Atlas adalah kamus dan direktori medis berbahasa Indonesia. Gunakan untuk mengenali istilah medis dan mencari informasi tentang penyakit, obat, dokter spesialis, serta rumah sakit. Kamus juga mencakup obat herbal dan pengobatan ala Nabi.</p>
+      </section>
+      <section aria-labelledby="guide-use">
+        <h3 id="guide-use" tabindex="-1">Cara memakai kamus</h3>
+        <ol>
+          <li>Ketik nama atau kata kunci di kotak pencarian. Gunakan kategori atau huruf awal untuk mempersempit hasil.</li>
+          <li>Tekan Sebelumnya atau Berikutnya untuk membalik halaman. Di HP, Anda juga dapat menggeser halaman ke samping.</li>
+          <li>Tekan bintang pada entri untuk menyimpannya ke Favorit.</li>
+          <li>Jika istilah belum tersedia, tekan Tambah ke kamus, tulis penjelasan, lalu simpan. Anda juga bisa memilih Tambah artikel ke kamus pada hasil artikel yang sesuai.</li>
+        </ol>
+        <p>Favorit dan entri tambahan tersimpan di browser atau instalasi yang digunakan. Pencarian artikel Wikipedia memerlukan internet.</p>
+      </section>
+      <section aria-labelledby="guide-install">
+        <h3 id="guide-install" tabindex="-1">Instal di perangkat</h3>
+        <p>Buka situs ini di browser. Gunakan tombol Instal aplikasi jika browser menampilkan dialog pemasangan, atau ikuti petunjuk perangkat berikut.</p>
+        <dl>
+          <dt>Windows</dt><dd>Di Chrome, pilih ikon instal di bilah alamat atau cari opsi instal di menu. Di Edge, buka menu ⋯ → Aplikasi → Instal situs ini sebagai aplikasi.</dd>
+          <dt>macOS</dt><dd>Di Safari pada macOS Sonoma 14 atau lebih baru, pilih File → Tambahkan ke Dock. Di Chrome, gunakan ikon instal atau opsi instal di menu.</dd>
+          <dt>iPhone dan iPad</dt><dd>Di Safari, pilih Bagikan → Tambahkan ke Layar Utama. Aktifkan Buka sebagai App Web jika tersedia, lalu pilih Tambah.</dd>
+          <dt>Android</dt><dd>Di Chrome, buka menu ⋮ → Tambahkan ke layar utama → Instal. Nama pilihan bisa berbeda menurut versi browser.</dd>
+        </dl>
+        <p>Setelah dipasang, buka Elsyarif Medika Atlas lewat ikon di perangkat.</p>
+      </section>
+      <section aria-labelledby="guide-developer">
+        <h3 id="guide-developer" tabindex="-1">Pengembang</h3>
+        <p><strong>Liyas Syarifudin,S.Pd.I, M,Pd.</strong></p>
+      </section>
+    </dialog>
     <script type="module" src="./src/main.ts"></script>
   </body>
 </html>

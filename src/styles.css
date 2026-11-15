@@ -512,3 +512,57 @@ footer a {
 #entry-feedback { padding: .65rem; background: #eff7f1; border-radius: 6px; }
 .article-save { display: block; margin-top: .7rem; }
 .article-save:disabled { opacity: .55; cursor: default; }
+
+.nav-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: .4rem;
+}
+.nav-actions button, .guide-header button { padding-inline: .7rem; }
+#install-open {
+  background: #17504e;
+  border-color: #17504e;
+  color: #fff;
+  font-weight: 700;
+}
+.app-guide {
+  width: min(44rem, calc(100% - 1.5rem));
+  max-height: 85vh;
+  padding: 0;
+  border: 1px solid #c4d9d1;
+  border-radius: 16px;
+  background: #fffefa;
+  color: #172e38;
+}
+.app-guide::backdrop { background: #142e37aa; }
+.guide-header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: .85rem 1rem;
+  background: #e9f4ef;
+  border-bottom: 1px solid #c4d9d1;
+}
+.guide-header h2 { margin: 0; }
+.guide-nav {
+  display: flex;
+  gap: .5rem 1rem;
+  flex-wrap: wrap;
+  padding: .9rem 1rem 0;
+}
+.guide-nav a { color: #17504e; font-weight: 700; }
+.app-guide section { padding: .65rem 1rem; line-height: 1.6; }
+.app-guide section h3 { scroll-margin-top: 5rem; margin: .2rem 0; }
+.app-guide section + section { border-top: 1px solid #e8ebdf; }
+.app-guide ol { padding-left: 1.3rem; list-style: decimal; }
+.app-guide dl { margin-block: .7rem; }
+.app-guide dt { margin-top: .55rem; font-weight: 700; }
+.app-guide dd { margin-left: 0; }
+@media (max-width: 600px) {
+  .nav { flex-wrap: wrap; padding-block: .6rem; }
+  .nav-actions { justify-content: flex-start; }
+}
