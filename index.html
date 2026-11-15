@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Elsyarif Medika Atlas | Kamus dan direktori medis</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="shell nav">
+        <div class="brand">
+          <span class="logo" aria-hidden="true">✚</span> <span>Elsyarif Medika <span class="brand-accent">Atlas</span></span>
+        </div>
+        <button id="favorites" type="button" aria-pressed="false">
+          ☆ Favorit <span id="favorite-count">0</span>
+        </button>
+      </div>
+    </header>
+    <main class="shell">
+      <section class="hero" aria-labelledby="title">
+        <div class="hero-text">
+          <h1 id="title">Kamus kedokteran</h1>
+          <p>Cari istilah medis, obat, rumah sakit, atau dokter spesialis.</p>
+          <label for="query">Cari di kamus</label>
+          <input
+            id="query"
+            type="search"
+            placeholder="Contoh: hipertensi, parasetamol, RSCM"
+            autocomplete="off"
+          />
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <span>+</span><span>+</span><span>+</span>
+        </div>
+      </section>
+      <section class="catalog" aria-labelledby="results-title">
+        <div class="filter-row">
+          <label for="category">Kategori</label>
+          <select id="category">
+            <option value="">Semua kategori</option>
+          </select>
+        </div>
+        <p id="storage-note" hidden role="status">
+          Favorit tersedia selama halaman ini terbuka.
+        </p>
+        <div
+          id="alphabet"
+          class="alphabet"
+          role="group"
+          aria-label="Huruf awal"
+        ></div>
+        <div class="result-head">
+          <h2 id="results-title">Daftar istilah</h2>
+          <span id="count" role="status"></span>
+        </div>
+        <div id="book" class="book" role="region" aria-label="Buku kamus" tabindex="0" hidden>
+          <nav class="book-controls" aria-label="Navigasi halaman">
+            <button id="book-prev" type="button" aria-controls="entries" aria-disabled="true">‹ <span>Sebelumnya</span></button>
+            <span id="book-page" role="status"></span>
+            <button id="book-next" type="button" aria-controls="entries" aria-disabled="true"><span>Berikutnya</span> ›</button>
+          </nav>
+          <div id="entries" class="entries book-pages"></div>
+        </div>
+        <div id="empty" class="empty" hidden>
+          <p></p>
+          <button id="reset" type="button">Reset filter</button>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <div class="shell">
+        <span class="care-footer-note">Informasi penanganan bersifat umum. Untuk keputusan perawatan, konsultasikan dengan tenaga kesehatan.</span> <br />Rujukan kamus
+        <a href="https://medlineplus.gov/medwords/medicalwords.html"
+          >MedlinePlus</a
+        >
+        dan
+        <a href="https://www.cancer.gov/publications/dictionaries/cancer-terms"
+          >National Cancer Institute</a
+        >
+      </div>
+    </footer>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

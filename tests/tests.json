@@ -1,0 +1,94 @@
+[
+  {
+    "name": "Cari istilah dan singkatan",
+    "sanity": true,
+    "viewport": "desktop",
+    "covers": [
+      "pencarian Indonesia dan Inggris",
+      "singkatan",
+      "pencarian beberapa kata",
+      "navigasi halaman buku desktop"
+    ],
+    "description": "Memastikan pencarian menerima padanan Inggris dan singkatan.",
+    "steps": [
+      "Pada daftar awal, periksa dua halaman terlihat. Tekan Berikutnya dan periksa Halaman 3–4, lalu tekan Sebelumnya.",
+      "Ketik biopsy pada pencarian dan periksa Biopsi.",
+      "Ganti kata kunci menjadi EKG.",
+      "Ganti kata kunci menjadi tekanan darah tinggi."
+    ],
+    "expected": "Biopsi tampil untuk biopsy, Elektrokardiogram untuk EKG, dan Hipertensi untuk tekanan darah tinggi. Tombol navigasi memindahkan buku dari halaman 1–2 ke 3–4 dan kembali."
+  },
+  {
+    "name": "Simpan dan hapus favorit",
+    "viewport": "mobile",
+    "covers": [
+      "favorit tersimpan",
+      "tampilan HP",
+      "satu halaman buku di HP"
+    ],
+    "description": "Memeriksa favorit dapat disimpan dan dihapus di HP.",
+    "steps": [
+      "Pada daftar awal, periksa Halaman 1, lalu tekan Berikutnya dan periksa Halaman 2.",
+      "Cari Anemia dan tekan Simpan Anemia.",
+      "Muat ulang halaman dan tekan Favorit.",
+      "Periksa Anemia lalu tekan Hapus Anemia."
+    ],
+    "expected": "Anemia bertahan setelah halaman dimuat ulang. Setelah dihapus, daftar favorit kosong."
+  },
+  {
+    "name": "Gabungkan filter dan pulihkan hasil",
+    "viewport": "desktop",
+    "covers": [
+      "kategori dan alfabet",
+      "keadaan kosong dan reset",
+      "rujukan"
+    ],
+    "description": "Memeriksa filter, keadaan tanpa hasil dan tautan sumber.",
+    "steps": [
+      "Pilih kategori Pemeriksaan dan huruf B.",
+      "Periksa Biopsi dan tautan Rujukan NCI pada kartunya.",
+      "Masukkan xyz123 pada pencarian lalu tekan Reset filter."
+    ],
+    "expected": "Sebelum reset muncul pesan Tidak ada istilah yang cocok. Setelah reset, seluruh istilah tampil kembali."
+  },
+  {
+    "name": "Lihat penanganan dan kandungan",
+    "viewport": "mobile",
+    "covers": [
+      "penanganan penyakit",
+      "kandungan obat",
+      "rujukan medis",
+      "layanan rumah sakit khusus",
+      "alamat dan peta layanan",
+      "obat herbal dan bukti klinis",
+      "pengobatan ala Nabi dan rujukan hadis"
+    ],
+    "description": "Memeriksa dua jenis rincian medis pada ponsel.",
+    "steps": [
+      "Cari Hipertensi lalu periksa Penanganan umum dan Rujukan penanganan.",
+      "Cari aritmia dan periksa bagian Rumah sakit dengan layanan khusus beserta Harapan Kita, alamat, Layanan resmi, dan Buka peta.",
+      "Ganti pencarian menjadi parasetamol dan pilih kategori Obat.",
+      "Ganti kategori menjadi Obat herbal lalu cari jahe. Periksa Bahan, Bukti klinis, dan Perhatian.",
+      "Pilih Pengobatan ala Nabi dan cari jintan hitam. Periksa Habbatussauda dan tautan Sahih al-Bukhari 5688."
+    ],
+    "expected": "Hipertensi memuat penanganan umum dan tautan sumber. Parasetamol menampilkan Kandungan aktif dan keterangan sediaan. Aritmia menampilkan Harapan Kita dengan alamat, tautan layanan resmi, dan peta. Jahe dan Habbatussauda muncul di kategori masing-masing serta memuat rujukan yang sesuai."
+  },
+  {
+    "name": "Cari rumah sakit dan dokter",
+    "viewport": "desktop",
+    "covers": [
+      "lokasi dan alamat rumah sakit",
+      "tautan peta",
+      "biografi dokter",
+      "tempat praktik",
+      "sumber resmi"
+    ],
+    "description": "Memeriksa kedua bagian direktori dan tautan resminya.",
+    "steps": [
+      "Pilih kategori Rumah sakit dan cari RSUD Ciawi.",
+      "Periksa lokasi, alamat, dan tautan Buka peta.",
+      "Ganti kategori menjadi Dokter spesialis dan cari Hari Hendarto."
+    ],
+    "expected": "RSUD Ciawi mencantumkan alamat di Kabupaten Bogor dan tautan peta. Hari Hendarto menampilkan biografi profesional, tempat praktik, dan tautan profil resmi."
+  }
+]
