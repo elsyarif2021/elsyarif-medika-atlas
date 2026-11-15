@@ -375,8 +375,41 @@ terms.push(...additions, ...specialistHospitals, ...complementaryEntries);
 const hospitalDirectory = new Map(
   terms.filter(term => term[2] === 'Rumah sakit').map(term => [term[0], term[6]])
 );
-terms.sort((a, b) => alphabeticalName(a).localeCompare(alphabeticalName(b), 'id'));
-[...new Set(terms.map(term => term[2]))]
+const wikiCategory = 'Rujukan Wikipedia';
+const wikiStorageKey = 'medika-atlas-wikipedia-v1';
+const wikiEntries = new Map();
+const wikiLink = id => 'https://id.wikipedia.org/?curid=' + id;
+const sortTerms = () => terms.sort((a, b) =>
+  alphabeticalName(a).localeCompare(alphabeticalName(b), 'id')
+);
+
+function rememberWikiEntry({ id, title, summary, alias }) {
+  if (!Number.isSafeInteger(id) || id < 1 ||
+      typeof title !== 'string' || !title.trim() || title.length > 300 ||
+      typeof summary !== 'string' || !summary.trim() || summary.length > 2500 ||
+      typeof alias !== 'string' || alias.length > 160 ||
+      wikiEntries.has(id) || terms.some(term => normalize(term[0]) === normalize(title))) return false;
+  wikiEntries.set(id, { id, title, summary, alias });
+  terms.push([title, '', wikiCategory, summary, '', alias, {
+    fields: [['Jenis informasi', 'Ringkasan dari Wikipedia bahasa Indonesia.']],
+    links: [['Artikel Wikipedia dan atribusi', wikiLink(id)],
+      ['Lisensi CC BY-SA', 'https://creativecommons.org/licenses/by-sa/4.0/']]
+  }]);
+  return true;
+}
+
+try {
+  const savedWiki = JSON.parse(localStorage.getItem(wikiStorageKey) || '[]');
+  if (Array.isArray(savedWiki)) {
+    for (const row of savedWiki) {
+      if (row && typeof row === 'object') rememberWikiEntry(row);
+    }
+  }
+} catch {
+  // The dictionary is still usable if browser storage is unavailable.
+}
+sortTerms();
+[...new Set([wikiCategory, ...terms.map(term => term[2])])]
   .sort()
   .forEach(label => category.add(new Option(label, label)));
 
@@ -456,11 +489,13 @@ function card([name, english, group, meaning, reference, aliases, details]) {
   article.innerHTML = `
     <div class="card-top">
       <span class="tag">${group}</span>
-      <button type="button" class="save" aria-pressed="${saved}" aria-label="${saved ? 'Hapus' : 'Simpan'} ${name}" title="${saved ? 'Hapus dari favorit' : 'Simpan ke favorit'}">${saved ? '★' : '☆'}</button>
+      <button type="button" class="save" aria-pressed="${saved}" aria-label="" title="${saved ? 'Hapus dari favorit' : 'Simpan ke favorit'}">${saved ? '★' : '☆'}</button>
     </div>
-    <h3>${name}</h3>
+    <h3></h3>
     ${english ? '<div class="english" lang="en">' + english + '</div>' : ''}
-    ${meaning ? '<p>' + meaning + '</p>' : ''}`;
+    ${meaning ? '<p class="entry-meaning"></p>' : ''}`;
+  article.querySelector('h3').textContent = name;
+  if (meaning) article.querySelector('.entry-meaning').textContent = meaning;
   if (fields.length) {
     const list = document.createElement('dl');
     list.className = 'entry-details';
@@ -489,6 +524,7 @@ function card([name, english, group, meaning, reference, aliases, details]) {
   }
   article.append(sources);
   const save = article.querySelector('button');
+  save.setAttribute('aria-label', (saved ? 'Hapus ' : 'Simpan ') + name);
   save.addEventListener('click', () => {
     if (saved) favorites.delete(name);
     else favorites.add(name);
@@ -592,32 +628,70 @@ const webItems = byId('web-items');
 const webButtons = [byId('web-search'), byId('web-empty')];
 let webKeyword = '';
 let webRequest;
+let automaticTimer;
+let attemptedKeyword;
 
 function updateWebSearch(keyword) {
   for (const button of webButtons) button.hidden = !keyword;
   if (keyword === webKeyword) return;
   webKeyword = keyword;
+  attemptedKeyword = undefined;
+  clearTimeout(automaticTimer);
   webRequest?.abort();
   webResults.hidden = true;
   webItems.replaceChildren();
   webStatus.textContent = '';
 }
 
-async function searchArticles() {
+const wikiWords = value => normalize(value).match(/[\p{L}\p{N}]+/gu) || [];
+
+function importMatchingArticle(pages, keyword) {
+  const words = wikiWords(keyword);
+  const page = pages.find(({ title, extract }) => {
+    if (typeof title !== 'string' || typeof extract !== 'string') return false;
+    const titleWords = wikiWords(title);
+    const healthContext = /\b(penyakit|medis|kedokteran|gangguan|gejala|infeksi|virus|bakteri|obat|kesehatan|rumah sakit|diagnosis|dokter|sindrom|organ tubuh|terapi|medik)\b/i;
+    return words.length && words.every(word => titleWords.includes(word))
+      && healthContext.test(extract);
+  });
+  if (!page || !rememberWikiEntry({
+    id: page.pageid,
+    title: page.title,
+    summary: page.extract.trim().slice(0, 2500),
+    alias: keyword
+  })) return '';
+
+  sortTerms();
+  let stored = true;
+  try {
+    localStorage.setItem(wikiStorageKey, JSON.stringify([...wikiEntries.values()]));
+  } catch {
+    stored = false;
+  }
+  render({ keepPage: true });
+  return page.title + (stored
+    ? ' ditambahkan ke kamus di browser ini.'
+    : ' ditambahkan untuk sesi ini. Browser tidak dapat menyimpannya.');
+}
+
+async function searchArticles({ automatic = false } = {}) {
   if (!webKeyword) return;
+  clearTimeout(automaticTimer);
+  const keyword = webKeyword;
+  attemptedKeyword = keyword;
   webRequest?.abort();
   const request = new AbortController();
   webRequest = request;
   webResults.hidden = false;
   webItems.replaceChildren();
   webStatus.textContent = 'Mencari artikel Wikipedia bahasa Indonesia…';
-  byId('web-heading').focus();
+  if (!automatic) byId('web-heading').focus();
 
   const url = new URL('https://id.wikipedia.org/w/api.php');
   url.search = new URLSearchParams({
     action: 'query',
     generator: 'search',
-    gsrsearch: webKeyword,
+    gsrsearch: keyword,
     gsrlimit: '5',
     gsrnamespace: '0',
     prop: 'extracts',
@@ -638,9 +712,12 @@ async function searchArticles() {
     if (payload.error) throw new Error('Article search failed');
     if (webRequest !== request || request.signal.aborted) return;
     const pages = (payload.query?.pages || []).sort((a, b) => a.index - b.index);
-    webStatus.textContent = pages.length
+    const imported = !bookMatches.length && !onlyFavorites && !letter &&
+      (!category.value || category.value === wikiCategory)
+      ? importMatchingArticle(pages, keyword) : '';
+    webStatus.textContent = imported || (pages.length
       ? pages.length + ' artikel dari Wikipedia bahasa Indonesia.'
-      : 'Artikel belum ditemukan. Coba kata kunci lain.';
+      : 'Artikel belum ditemukan. Coba kata kunci lain.');
     for (const page of pages) {
       const article = document.createElement('article');
       article.className = 'web-article';
@@ -663,7 +740,7 @@ async function searchArticles() {
   }
 }
 
-for (const button of webButtons) button.addEventListener('click', searchArticles);
+for (const button of webButtons) button.addEventListener('click', () => searchArticles());
 
 function render({ keepPage = false } = {}) {
   if (!keepPage) pageStart = 0;
@@ -702,6 +779,12 @@ function render({ keepPage = false } = {}) {
   byId('reset').hidden = onlyFavorites && !favorites.size;
   bookMatches = matches;
   showSpread();
+  clearTimeout(automaticTimer);
+  if (!matches.length && !onlyFavorites && !letter &&
+      (!category.value || category.value === wikiCategory) &&
+      keyword.length >= 3 && keyword.length <= 160 && keyword !== attemptedKeyword) {
+    automaticTimer = setTimeout(() => searchArticles({ automatic: true }), 650);
+  }
 }
 
 function resetFilters() {
